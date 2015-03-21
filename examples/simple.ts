@@ -1,5 +1,5 @@
-import traderNet = require("../trader-net");
-import traderUtils = require("../trader-utils");
+import traderNet = require("../src/trader-net");
+import traderUtils = require("../src/trader-utils");
 
 var traderNetOpts: traderNet.ITraderNetOpts = {
     onPortfolio(portfolio: traderNet.ITraderNetPortfolio) {

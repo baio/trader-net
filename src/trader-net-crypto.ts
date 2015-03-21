@@ -1,3 +1,4 @@
+///<reference path="../typings/node/node.d.ts"/>
 var crypto = require('crypto');
 
 var isObject = function (val) { return Object.prototype.toString.call(val) === '[object Object]'; };

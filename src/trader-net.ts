@@ -1,6 +1,6 @@
-///<reference path="./typings/node/node.d.ts"/>
-///<reference path="./typings/socket.io-client/socket.io-client.d.ts"/>
-///<reference path="./typings/bluebird/bluebird.d.ts"/>
+///<reference path="../typings/node/node.d.ts"/>
+///<reference path="../typings/socket.io-client/socket.io-client.d.ts"/>
+///<reference path="../typings/bluebird/bluebird.d.ts"/>
 
 import ticketCodes = require("./ticket-codes")
 import orderCodes = require("./order-codes");
