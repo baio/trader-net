@@ -140,7 +140,7 @@ interface ISocketPromisifyed extends SocketIOClient.Socket {
     emitAsync<T>(event: string, prm1?: any, prm2?: any): Promise<T>
 }
 
-interface ITraderNetPutOrderData {
+export interface ITraderNetPutOrderData {
     instr_name: string
     action_id: number
     order_type_id: number
@@ -192,7 +192,7 @@ export class TraderNet{
     }
 
     static  mapOrder(tnOrder: any) : IOrder {
-        return {
+        return <IOrder>{
             id: tnOrder.id,
             date: tnOrder.date,
             status: tnOrder.stat,
@@ -253,7 +253,7 @@ export class TraderNet{
                 cmd: 'getAuthInfo',
                 nonce: Date.now()
             };
-            var sig = crypto.sign(data, auth.securityKey);
+            var sig = (<any>crypto).sign(data, auth.securityKey);
             return ws.emitAsync<ITraderNetAuthResult>('auth', data, sig);
         }).then(res => {
             if (this.opts) {
@@ -279,11 +279,10 @@ export class TraderNet{
 
     notifyPortfolio = () => {
         this.ws.emit('notifyPortfolio');
-    }
+    };
 
     notifyOrders = () => {
-
         this.ws.emit('notifyOrders');
-    }
+    };
 }
 
