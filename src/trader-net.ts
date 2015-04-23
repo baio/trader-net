@@ -123,6 +123,7 @@ export interface ITraderNetPortfolio {
 export interface ITraderNetOpts {
     onPortfolio?: (portfolio: ITraderNetPortfolio) => void
     onOrders?: (orders: any) => void
+    onQuotes?: (quotes: Array<ITraderNetQuote>) => void
 }
 
 export interface ITraderNetAuthResult {
@@ -155,6 +156,76 @@ export interface ITraderNetPutOrderData {
     replace_order_id: number
     groupPortfolioName: number
     userOrderId: number
+}
+
+export interface ITraderNetQuote {
+
+    ///Тикер бумаги
+    security: ticketCodes.TicketCodes
+    //Цена последней сделки
+    latestPrice : number
+    /*
+     n	Порядковый номер котировки. Каждый тикер имеет свою нумерацию
+     c	Тикер
+     mrg	Признак маржинальности. Если бумага маржинальна, содержит строку 'M'
+     ltr	Биржа последней сделки
+     kind	Вид бумаги (1 - Common Обыкновенные, 2 - Pref Привилегированные, 3 - Percent Процентные, 4 - Discount Дисконтные, 5 - Delivery Поставочный, 6 - Rated Расчетный, 7 - Interval Интервальный)
+     type	Тип бумаги (1 - акции, 2 - облигации, 3 - фьючерсы)
+     name	Название бумаги
+     name2	Латинское название бумаги
+     bbp	Лучший бид
+     bbc	Обозначение изменения лучшего бида ('' - не изменился, 'D' - вниз, 'U' - вверх)
+     bbs	Количество (сайз) лучшего бида
+     bbf	Объем(?) лучшего бида
+     bap	Лучший аск
+     bac	Обозначение изменения лучшего аска ('' - не изменился, 'D' - вниз, 'U' - вверх)
+     bas	Количество (сайз) лучшего аска
+     baf	Объем(?) лучшего аска
+     pp	Цена предыдущего закрытия
+     op	Цена открытия в текущей торговой сессии
+     ltp	Цена последней сделки
+     lts	Количество (сайз) последней сделки
+     ltt	Время последней сделки
+     chg	Изменение цены последней сделки в пунктах относительно цены закрытия предыдущей торговой сессии
+     pcp	Изменение в процентах относительно цены закрытия предыдущей торговой сессии
+     ltc	Обозначение изменения цены последней сделки ('' - не изменилась, 'D' - вниз, 'U' - вверх)
+     mintp	Минимальная цена сделки за день
+     maxtp	Максимальная цена сделки за день
+     vol	Объём торгов за день в штуках
+     vlt	Объём торгов за день в валюте
+     yld	Доходность к погашению (для облигаций)
+     acd	Накопленный купонный доход (НКД)
+     fv	Номинал
+     mtd	Дата погашения
+     cpn	Купон в валюте
+     cpp	Купонный период (в днях)
+     ncd	Дата следующего купона
+     ncp	Дата последнего купона
+     dpd	ГО покупки
+     dps	ГО продажи
+     trades	Количество сделок
+     min_step	Минимальный шаг цены
+     step_price	Шаг цены
+     p5	Цена 5 дней назад
+     chg5	Изменение цены за 5 дней
+     p22	Цена 22 дня назад
+     chg22	Изменение цены за 22 дня
+     p110	Цена 110 дней назад
+     chg110	Изменение цены за 110 дней
+     p220	Цена 220 дней назад
+     chg220	Изменение цены за 220 дней
+     x_dsc1	Дисконт
+     x_dsc2	не используется
+     x_dsc3	не используется
+     x_descr	Описание
+     x_curr	Валюта
+     x_short	Можно ли шортить бумагу
+     x_lot	Минимальный лот
+     x_currVal	Курс валюты по отношению к рублю
+     x_min	Минимум за (период)
+     x_max	Максимум за (период)
+     x_istrade	Были ли по бумаге сделки
+     */
 }
 
 export class TraderNet{
@@ -242,6 +313,15 @@ export class TraderNet{
         }
     }
 
+    static  mapQuotes(serviceQuote: any) : ITraderNetQuote {
+        return {
+            security: <any>ticketCodes.TicketCodes[serviceQuote.c],
+            latestPrice: serviceQuote.ltp,
+            lot: serviceQuote.x_lot
+        };
+    }
+
+
     connect(auth: ITraderNetAuth): Promise<ITraderNetAuthResult>{
         var _ws = io(this.url, {transports: [ 'websocket' ]});
         var ws = <ISocketPromisifyed>Promise.promisifyAll(_ws);
@@ -267,6 +347,11 @@ export class TraderNet{
                         this.opts.onOrders(orders[0].orders.order.map(TraderNet.mapOrder));
                     });
                 }
+                if (this.opts.onQuotes) {
+                    ws.on('q', (quotes) => {
+                        this.opts.onQuotes(quotes.q.map(TraderNet.mapQuotes));
+                    });
+                }
             }
             return res;
         });
@@ -284,5 +369,12 @@ export class TraderNet{
     notifyOrders = () => {
         this.ws.emit('notifyOrders');
     };
+
+    notifyQuotes = (tickets: Array<ticketCodes.TicketCodes|string>) => {
+        var ticketStrs = typeof tickets[0] != "string" ? tickets.map(m => ticketCodes.TicketCodes[<any>m]) : tickets;
+        this.ws.emit('notifyQuotes', ticketStrs);
+    };
+
+
 }
 

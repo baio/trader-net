@@ -80,6 +80,7 @@ export interface ITraderNetPortfolio {
 export interface ITraderNetOpts {
     onPortfolio?: (portfolio: ITraderNetPortfolio) => void;
     onOrders?: (orders: any) => void;
+    onQuotes?: (orders: any) => void;
 }
 export interface ITraderNetAuthResult {
     login: string;
