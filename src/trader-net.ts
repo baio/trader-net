@@ -8,9 +8,9 @@ import securityTypes = require("./security-types");
 import currencyCodes = require("./currency-codes");
 
 var crypto = require("./trader-net-crypto");
-var io = require('socket.io-client')
-var Promise = require("bluebird")
-var util = require("util")
+var io = require('socket.io-client');
+var Promise = require("bluebird");
+var util = require("util");
 
 export var TicketCodes  = ticketCodes.TicketCodes;
 export var OrderActionTypes = orderCodes.OrderActionTypes;
@@ -124,6 +124,10 @@ export interface ITraderNetOpts {
     onPortfolio?: (portfolio: ITraderNetPortfolio) => void
     onOrders?: (orders: any) => void
     onQuotes?: (quotes: Array<ITraderNetQuote>) => void
+    /**
+     * Listen quotes if async notify quotes, is supposed to be used
+     */
+    listenQuotes?: boolean
 }
 
 export interface ITraderNetAuthResult {
@@ -231,6 +235,11 @@ export interface ITraderNetQuote {
 export class TraderNet{
 
     private ws: ISocketPromisifyed;
+    private resolvers : {
+        portfolio: Promise.Resolver<ITraderNetPortfolio>
+        quotes: Promise.Resolver<Array<ITraderNetQuote>>
+        order: Promise.Resolver<ITraderNetPutOrderData>
+    } = {portfolio: null, quotes: null, order: null};
 
     constructor(private url:string, private opts: ITraderNetOpts){
     }
@@ -336,22 +345,26 @@ export class TraderNet{
             var sig = (<any>crypto).sign(data, auth.securityKey);
             return ws.emitAsync<ITraderNetAuthResult>('auth', data, sig);
         }).then(res => {
-            if (this.opts) {
-                if (this.opts.onPortfolio) {
-                    ws.on('portfolio', (portfolio) => {
-                        this.opts.onPortfolio(TraderNet.mapPortfolio(portfolio[0].ps));
-                    });
-                }
-                if (this.opts.onOrders) {
-                    ws.on('orders', (orders) => {
-                        this.opts.onOrders(orders[0].orders.order.map(TraderNet.mapOrder));
-                    });
-                }
-                if (this.opts.onQuotes) {
-                    ws.on('q', (quotes) => {
-                        this.opts.onQuotes(quotes.q.map(TraderNet.mapQuotes));
-                    });
-                }
+            if (this.opts.onPortfolio) {
+                ws.on('portfolio', (portfolio) => {
+                    this.opts.onPortfolio(TraderNet.mapPortfolio(portfolio[0].ps));
+                });
+            }
+            if (this.opts.onOrders) {
+                ws.on('orders', (orders) => {
+                    this.opts.onOrders(orders[0].orders.order.map(TraderNet.mapOrder));
+                });
+            }
+            if (this.opts.onQuotes || this.opts.listenQuotes) {
+                ws.on('q', (quotes) => {
+                    var res = quotes.q.map(TraderNet.mapQuotes);
+                    if (this.opts.onQuotes)
+                        this.opts.onQuotes(res);
+                    if (this.resolvers.quotes) {
+                        this.resolvers.quotes.resolve(res);
+                        this.resolvers.quotes = null;
+                    }
+                });
             }
             return res;
         });
@@ -375,6 +388,13 @@ export class TraderNet{
         this.ws.emit('notifyQuotes', ticketStrs);
     };
 
+    notifyQuotesAsync = (tickets: Array<ticketCodes.TicketCodes|string>) => {
+        if (this.resolvers.quotes)
+            return Promise.reject("Only one async oper of each type is allowed");
+        this.resolvers.quotes = Promise.defer();
+        this.notifyQuotes(tickets);
+        return this.resolvers.quotes.promise;
+    };
 
 }
 
