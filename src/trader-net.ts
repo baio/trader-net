@@ -22,13 +22,14 @@ export class TraderNet {
         portfolio: Promise.Resolver<tn.ITraderNetPortfolio>
         quotes: Promise.Resolver<Array<tn.ITraderNetQuote>>
         order: Promise.Resolver<tn.ITraderNetPutOrderData>
-    } = {portfolio: null, quotes: null, order: null};
+        disconnect: Promise.Resolver<any>
+    } = {portfolio: null, quotes: null, order: null, disconnect: null};
 
     constructor(private url:string, private opts: tn.ITraderNetOpts){
     }
 
     connect(auth: tn.ITraderNetAuth): Promise<tn.ITraderNetAuthResult>{
-        var _ws = io(this.url, {transports: [ 'websocket' ]});
+        var _ws = io(this.url, {transports: [ 'websocket' ], forceNew : true});
         var ws = <ISocketPromisifyed>Promise.promisifyAll(_ws);
         this.ws = ws;
 
@@ -62,8 +63,29 @@ export class TraderNet {
                     }
                 });
             }
+            ws.on('disconnect', () => {
+                if (this.resolvers.disconnect) {
+                    this.resolvers.disconnect.resolve();
+                    this.resolvers.disconnect = null;
+                }
+                this.ws = null;
+            });
             return res;
         });
+    }
+
+    disconnect() : Promise<any>{
+
+        if (!this.ws)
+            return Promise.reject("Not connected");
+
+        if (this.resolvers.disconnect)
+            return Promise.reject("Already disconnecting");
+
+        this.resolvers.disconnect = Promise.defer();
+        var promise = this.resolvers.disconnect.promise;
+        (<any>this.ws).disconnect();
+        return promise;
     }
 
     putOrder(data: tn.IPutOrderData): Promise<tn.IPutOrderResult> {
@@ -84,7 +106,7 @@ export class TraderNet {
         this.ws.emit('notifyQuotes', ticketStrs);
     };
 
-    notifyQuotesAsync = (tickets: Array<ticketCodes.TicketCodes|string>) => {
+    notifyQuotesAsync = (tickets: Array<ticketCodes.TicketCodes|string>) : Promise<Array<tn.ITraderNetQuote>> => {
         if (this.resolvers.quotes)
             return Promise.reject("Only one async oper of each type is allowed");
         this.resolvers.quotes = Promise.defer();
