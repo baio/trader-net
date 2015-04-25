@@ -6,8 +6,8 @@ import ticketCodes = require("./ticket-codes")
 import orderCodes = require("./order-codes");
 import securityTypes = require("./security-types");
 import currencyCodes = require("./currency-codes");
+import crypto = require("./trader-net-crypto");
 
-var crypto = require("./trader-net-crypto");
 var io = require('socket.io-client');
 var Promise = require("bluebird");
 var util = require("util");
@@ -342,7 +342,7 @@ export class TraderNet{
                 cmd: 'getAuthInfo',
                 nonce: Date.now()
             };
-            var sig = (<any>crypto).sign(data, auth.securityKey);
+            var sig = crypto.sign(data, auth.securityKey);
             return ws.emitAsync<ITraderNetAuthResult>('auth', data, sig);
         }).then(res => {
             if (this.opts.onPortfolio) {

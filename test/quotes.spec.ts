@@ -5,7 +5,6 @@ import chai = require('chai');
 var expect = chai.expect;
 import trader = require("../src/trader-net");
 
-
 describe("quotes-test", () => {
 
     describe("Request quotes", () => {

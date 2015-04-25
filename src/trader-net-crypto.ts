@@ -9,11 +9,9 @@ var hash_hmac = function (type, data, key) {
     return hash.digest('hex');
 };
 
-var sign = function (data, apiSec) {
+export var sign = function (data, apiSec) {
     return hash_hmac('sha256', preSign(data), apiSec);
 };
-
-
 
 var sortBy = function (arr, cb) {
     return arr.sort(function (a, b) {
@@ -25,21 +23,18 @@ var sortBy = function (arr, cb) {
     });
 };
 
-// ?????????? ???? ????-????????
 var pairs = function (collection) {
     return Object.keys(collection).map(function (key) {
         return [key, collection[key]];
     });
 };
 
-// ?????????? ???? ????-????????, ??????????????? ?? ?????
 var ksort = function (collection) {
     return sortBy(pairs(collection), function (a) {
         return a[0];
     });
 };
 
-// ????? ??? ????????? ?????? ??? ???????
 var preSign = function (collection) {
     var keyVals = ksort(collection);
 
@@ -52,7 +47,9 @@ var preSign = function (collection) {
         return key + '=' + value;
     }).join('&');
 };
-
+/*
 exports.pairs = pairs;
 exports.ksort = ksort;
 exports.sign = sign;
+*/
+
