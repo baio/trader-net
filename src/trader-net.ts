@@ -9,23 +9,33 @@ import ticketCodes = require("./ticket-codes")
 import tn = require("./trader-net-types");
 import mapper = require("./trader-net-mapper");
 import crypto = require("./trader-net-crypto");
+import quotesResolverManager = require("./quotes-resolver-manager");
+import utils = require("./utils");
 
 interface ISocketPromisifyed extends SocketIOClient.Socket {
     onAsync<T>(event: string): Promise<T>
     emitAsync<T>(event: string, prm1?: any, prm2?: any): Promise<T>
 }
 
+interface TraderNetResolvers {
+    portfolio: Promise.Resolver<tn.ITraderNetPortfolio>
+    quotes: quotesResolverManager.QuotesResolver
+    order: Promise.Resolver<tn.ITraderNetPutOrderData>
+    disconnect: Promise.Resolver<any>
+}
+
 export class TraderNet {
 
     private ws: ISocketPromisifyed;
-    private resolvers : {
-        portfolio: Promise.Resolver<tn.ITraderNetPortfolio>
-        quotes: Promise.Resolver<Array<tn.ITraderNetQuote>>
-        order: Promise.Resolver<tn.ITraderNetPutOrderData>
-        disconnect: Promise.Resolver<any>
-    } = {portfolio: null, quotes: null, order: null, disconnect: null};
+    private resolvers: TraderNetResolvers;
 
     constructor(private url:string, private opts: tn.ITraderNetOpts){
+        this.resolvers = {
+            portfolio: null,
+            order: null,
+            disconnect: null,
+            quotes: new quotesResolverManager.QuotesResolver()
+        };
     }
 
     connect(auth: tn.ITraderNetAuth): Promise<tn.ITraderNetAuthResult>{
@@ -55,12 +65,12 @@ export class TraderNet {
             if (this.opts.onQuotes || this.opts.listenQuotes) {
                 ws.on('q', (quotes) => {
                     var res = quotes.q.map(mapper.mapQuotes);
+
                     if (this.opts.onQuotes)
                         this.opts.onQuotes(res);
-                    if (this.resolvers.quotes) {
-                        this.resolvers.quotes.resolve(res);
-                        this.resolvers.quotes = null;
-                    }
+
+                    this.resolvers.quotes.resolve(res);
+
                 });
             }
             ws.on('disconnect', () => {
@@ -102,16 +112,14 @@ export class TraderNet {
     };
 
     notifyQuotes = (tickets: Array<ticketCodes.TicketCodes|string>) => {
-        var ticketStrs = typeof tickets[0] != "string" ? tickets.map(m => ticketCodes.TicketCodes[<any>m]) : tickets;
-        this.ws.emit('notifyQuotes', ticketStrs);
+        //TODO: since server have some race conditions, ensure some debounce before sending
+        this.ws.emit('notifyQuotes', utils.getCodes(tickets));
     };
 
     notifyQuotesAsync = (tickets: Array<ticketCodes.TicketCodes|string>) : Promise<Array<tn.ITraderNetQuote>> => {
-        if (this.resolvers.quotes)
-            return Promise.reject("Only one async oper of each type is allowed");
-        this.resolvers.quotes = Promise.defer();
+        var res = this.resolvers.quotes.push(tickets);
         this.notifyQuotes(tickets);
-        return this.resolvers.quotes.promise;
+        return res;
     };
 
 }
