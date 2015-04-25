@@ -110,6 +110,8 @@ export interface ITraderNetOpts {
      * Listen quotes if async notify quotes, is supposed to be used
      */
     listenQuotes?: boolean
+    listenOrders?: boolean
+    listenPortfolio?: boolean
 }
 
 export interface ITraderNetAuthResult {

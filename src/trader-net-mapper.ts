@@ -23,6 +23,7 @@ export function formatPutOrder(data:tn.IPutOrderData):tn.ITraderNetPutOrderData 
 }
 
 export function mapPortfolio(servicePortfolio:any):tn.ITraderNetPortfolio {
+    console.log("trader-net-mapper.ts:26>>>", servicePortfolio);
     return {
         key: servicePortfolio.key,
         accounts: servicePortfolio.acc.map(mapAccount),

@@ -10,6 +10,7 @@ import tn = require("./trader-net-types");
 import mapper = require("./trader-net-mapper");
 import crypto = require("./trader-net-crypto");
 import quotesResolverManager = require("./quotes-resolver-manager");
+import resolverManager = require("./resolver-manager");
 import utils = require("./utils");
 
 interface ISocketPromisifyed extends SocketIOClient.Socket {
@@ -18,9 +19,9 @@ interface ISocketPromisifyed extends SocketIOClient.Socket {
 }
 
 interface TraderNetResolvers {
-    portfolio: Promise.Resolver<tn.ITraderNetPortfolio>
+    portfolio: resolverManager.ResolverManager<tn.ITraderNetPortfolio>
+    orders: resolverManager.ResolverManager<Array<tn.IOrder>>
     quotes: quotesResolverManager.QuotesResolver
-    order: Promise.Resolver<tn.ITraderNetPutOrderData>
     disconnect: Promise.Resolver<any>
 }
 
@@ -31,8 +32,8 @@ export class TraderNet {
 
     constructor(private url:string, private opts: tn.ITraderNetOpts){
         this.resolvers = {
-            portfolio: null,
-            order: null,
+            portfolio: new resolverManager.ResolverManager<tn.ITraderNetPortfolio>(),
+            orders: new resolverManager.ResolverManager<Array<tn.IOrder>>(),
             disconnect: null,
             quotes: new quotesResolverManager.QuotesResolver()
         };
@@ -45,6 +46,7 @@ export class TraderNet {
 
         return ws.onAsync<tn.ITraderNetAuthResult>("connect").then(() => {
             var data = {
+
                 apiKey: auth.apiKey,
                 cmd: 'getAuthInfo',
                 nonce: Date.now()
@@ -52,25 +54,28 @@ export class TraderNet {
             var sig = crypto.sign(data, auth.securityKey);
             return ws.emitAsync<tn.ITraderNetAuthResult>('auth', data, sig);
         }).then(res => {
-            if (this.opts.onPortfolio) {
+            if (this.opts.onPortfolio || this.opts.listenPortfolio) {
                 ws.on('portfolio', (portfolio) => {
-                    this.opts.onPortfolio(mapper.mapPortfolio(portfolio[0].ps));
+                    var res = mapper.mapPortfolio(portfolio[0].ps);
+                    if (this.opts.onPortfolio)
+                        this.opts.onPortfolio(res);
+                    this.resolvers.portfolio.resolve(res);
                 });
             }
-            if (this.opts.onOrders) {
+            if (this.opts.onOrders || this.opts.listenOrders) {
                 ws.on('orders', (orders) => {
-                    this.opts.onOrders(orders[0].orders.order.map(mapper.mapOrder));
+                    var res = orders[0].orders.order.map(mapper.mapOrder);
+                    if (this.opts.onOrders)
+                        this.opts.onOrders(res);
+                    this.resolvers.orders.resolve(res);
                 });
             }
             if (this.opts.onQuotes || this.opts.listenQuotes) {
                 ws.on('q', (quotes) => {
                     var res = quotes.q.map(mapper.mapQuotes);
-
                     if (this.opts.onQuotes)
                         this.opts.onQuotes(res);
-
                     this.resolvers.quotes.resolve(res);
-
                 });
             }
             ws.on('disconnect', () => {
@@ -119,6 +124,18 @@ export class TraderNet {
     notifyQuotesAsync = (tickets: Array<ticketCodes.TicketCodes|string>) : Promise<Array<tn.ITraderNetQuote>> => {
         var res = this.resolvers.quotes.push(tickets);
         this.notifyQuotes(tickets);
+        return res;
+    };
+
+    notifyOrdersAsync = () : Promise<Array<tn.IOrder>> => {
+        var res = this.resolvers.orders.push();
+        this.notifyOrders();
+        return res;
+    };
+
+    notifyPortfolioAsync = () : Promise<tn.ITraderNetPortfolio> => {
+        var res = this.resolvers.portfolio.push();
+        this.notifyPortfolio();
         return res;
     };
 

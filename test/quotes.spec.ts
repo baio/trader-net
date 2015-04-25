@@ -23,7 +23,6 @@ describe("quotes-test", () => {
                     trr.disconnect().then(done);
 
                 }
-
             };
 
             var auth : tn.ITraderNetAuth = {
@@ -75,7 +74,6 @@ describe("quotes-test", () => {
             };
 
             var trr = new trader.TraderNet(process.env.TRADERNET_URL, opts);
-
             trr.connect(auth).then(() => {
                 return Promise.all([trr.notifyQuotesAsync(["URKA"]), trr.notifyQuotesAsync(["SBER"])]);
             }).then((res) => {
@@ -86,7 +84,7 @@ describe("quotes-test", () => {
         });
 
 
-        it.only("WORK with a little delay between requests", (done) => {
+        it("WORK with a little delay between requests", (done) => {
 
             var auth : tn.ITraderNetAuth = {
                 apiKey: process.env.TRADERNET_API_KEY,
