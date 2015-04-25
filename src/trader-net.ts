@@ -2,249 +2,34 @@
 ///<reference path="../typings/socket.io-client/socket.io-client.d.ts"/>
 ///<reference path="../typings/bluebird/bluebird.d.ts"/>
 
-import ticketCodes = require("./ticket-codes")
-import orderCodes = require("./order-codes");
-import securityTypes = require("./security-types");
-import currencyCodes = require("./currency-codes");
-import crypto = require("./trader-net-crypto");
-
 var io = require('socket.io-client');
 var Promise = require("bluebird");
 var util = require("util");
 
-export var TicketCodes  = ticketCodes.TicketCodes;
-export var OrderActionTypes = orderCodes.OrderActionTypes;
-export var OrderExpirationTypes = orderCodes.OrderExpirationTypes;
-export var OrderStatusCodes = orderCodes.OrderStatusCodes;
-export var OrderTypes = orderCodes.OrderTypes;
-export var SecurityType = securityTypes.SecurityType;
-export var SecurityKind = securityTypes.SecurityKind;
-export var CurrencyCodes = currencyCodes.CurrencyCodes;
-
-export interface ITraderNetAuth {
-    apiKey: string
-    securityKey: string
-}
-
-export interface IPutOrderData {
-    ticket: ticketCodes.TicketCodes
-    action: orderCodes.OrderActionTypes
-    orderType: orderCodes.OrderTypes
-    currency: currencyCodes.CurrencyCodes
-    quantity: number
-    limitPrice?: number
-    stopPrice?: number
-    allOrNothing?: boolean
-    expiration?: orderCodes.OrderExpirationTypes
-    groupPortfolio?: number
-    userOrderId?: number
-}
-
-export interface IOrder {
-    id: number
-    date: string
-    status: orderCodes.OrderStatusCodes//???
-    statusOriginal: orderCodes.OrderStatusCodes//???
-    statusDate: string
-    security: ticketCodes.TicketCodes
-    securityName: string
-    securityName2: string
-    oper: number//???
-    type: number//???
-    currency: currencyCodes.CurrencyCodes
-    price: number
-    stopPrice: number
-    quantity: number
-    allOrNothing: boolean
-    expiration: currencyCodes.ExpirationTypes
-    rep: string//???
-    fv: string
-    stat_prev: number
-    userOrderId: string
-}
-
-export interface ITraderNetAccount {
-    ///Свободные средства
-    availableAmount: number
-    ///Валюта счёта
-    currency: currencyCodes.CurrencyCodes
-    ///Курс валюты счета
-    currencyRate: number
-    forecastIn: number
-    forecastOut: number
-}
-
-export interface ITraderNetPosition {
-    ///Тикер бумаги
-    security: ticketCodes.TicketCodes
-    ///Тип бумаги ???
-    securityType: securityTypes.SecurityType
-    ///Вид бумаги ???
-    securityKind: securityTypes.SecurityKind
-    //Стоимость
-    price: number
-    ///Количество
-    quantity: number
-    ///Валюта
-    currency: currencyCodes.CurrencyCodes
-    ///Курс валюты
-    currencyRate: number
-    ///Наименование бумаги
-    securityName: string
-    ///Альтернативное наименование бумаги
-    securityName2: string
-    ///Цена открытия
-    openPrice : number
-    ///Рыночная цена
-    marketPrice: number
-    /*
-    //???
-    vm: string
-    //???
-    go: number
-    //???
-    profit_close: number
-    //???
-    acc_pos_id: number
-    //???
-    trade: Array<{}>
-    */
-}
-
-export interface ITraderNetPortfolio {
-    ///Ключ сообщений портфеля (логин, предварённый знаком процента)
-    key: string
-    ///Массив счётов клиента
-    accounts: Array<ITraderNetAccount>
-    ///Массив позиций клиента
-    positions: Array<ITraderNetPosition>
-}
-
-export interface ITraderNetOpts {
-    onPortfolio?: (portfolio: ITraderNetPortfolio) => void
-    onOrders?: (orders: any) => void
-    onQuotes?: (quotes: Array<ITraderNetQuote>) => void
-    /**
-     * Listen quotes if async notify quotes, is supposed to be used
-     */
-    listenQuotes?: boolean
-}
-
-export interface ITraderNetAuthResult {
-    login: string
-    mode: string
-    trade: boolean
-}
-
-export interface IPutOrderResult {
-    orderId: number
-}
+import tn = require("./trader-net-types");
+import crypto = require("./trader-net-crypto");
+import currencyCodes = require("./currency-codes");
+import ticketCodes = require("./ticket-codes")
+import orderCodes = require("./order-codes");
 
 interface ISocketPromisifyed extends SocketIOClient.Socket {
     onAsync<T>(event: string): Promise<T>
     emitAsync<T>(event: string, prm1?: any, prm2?: any): Promise<T>
 }
 
-export interface ITraderNetPutOrderData {
-    instr_name: string
-    action_id: number
-    order_type_id: number
-    curr: string
-    limit_price: number
-    stop_price: number
-    qty: number
-    aon: number
-    expiration_id: number
-    submit_ch_c: number
-    message_id: number
-    replace_order_id: number
-    groupPortfolioName: number
-    userOrderId: number
-}
-
-export interface ITraderNetQuote {
-
-    ///Тикер бумаги
-    security: ticketCodes.TicketCodes
-    //Цена последней сделки
-    latestPrice : number
-    /*
-     n	Порядковый номер котировки. Каждый тикер имеет свою нумерацию
-     c	Тикер
-     mrg	Признак маржинальности. Если бумага маржинальна, содержит строку 'M'
-     ltr	Биржа последней сделки
-     kind	Вид бумаги (1 - Common Обыкновенные, 2 - Pref Привилегированные, 3 - Percent Процентные, 4 - Discount Дисконтные, 5 - Delivery Поставочный, 6 - Rated Расчетный, 7 - Interval Интервальный)
-     type	Тип бумаги (1 - акции, 2 - облигации, 3 - фьючерсы)
-     name	Название бумаги
-     name2	Латинское название бумаги
-     bbp	Лучший бид
-     bbc	Обозначение изменения лучшего бида ('' - не изменился, 'D' - вниз, 'U' - вверх)
-     bbs	Количество (сайз) лучшего бида
-     bbf	Объем(?) лучшего бида
-     bap	Лучший аск
-     bac	Обозначение изменения лучшего аска ('' - не изменился, 'D' - вниз, 'U' - вверх)
-     bas	Количество (сайз) лучшего аска
-     baf	Объем(?) лучшего аска
-     pp	Цена предыдущего закрытия
-     op	Цена открытия в текущей торговой сессии
-     ltp	Цена последней сделки
-     lts	Количество (сайз) последней сделки
-     ltt	Время последней сделки
-     chg	Изменение цены последней сделки в пунктах относительно цены закрытия предыдущей торговой сессии
-     pcp	Изменение в процентах относительно цены закрытия предыдущей торговой сессии
-     ltc	Обозначение изменения цены последней сделки ('' - не изменилась, 'D' - вниз, 'U' - вверх)
-     mintp	Минимальная цена сделки за день
-     maxtp	Максимальная цена сделки за день
-     vol	Объём торгов за день в штуках
-     vlt	Объём торгов за день в валюте
-     yld	Доходность к погашению (для облигаций)
-     acd	Накопленный купонный доход (НКД)
-     fv	Номинал
-     mtd	Дата погашения
-     cpn	Купон в валюте
-     cpp	Купонный период (в днях)
-     ncd	Дата следующего купона
-     ncp	Дата последнего купона
-     dpd	ГО покупки
-     dps	ГО продажи
-     trades	Количество сделок
-     min_step	Минимальный шаг цены
-     step_price	Шаг цены
-     p5	Цена 5 дней назад
-     chg5	Изменение цены за 5 дней
-     p22	Цена 22 дня назад
-     chg22	Изменение цены за 22 дня
-     p110	Цена 110 дней назад
-     chg110	Изменение цены за 110 дней
-     p220	Цена 220 дней назад
-     chg220	Изменение цены за 220 дней
-     x_dsc1	Дисконт
-     x_dsc2	не используется
-     x_dsc3	не используется
-     x_descr	Описание
-     x_curr	Валюта
-     x_short	Можно ли шортить бумагу
-     x_lot	Минимальный лот
-     x_currVal	Курс валюты по отношению к рублю
-     x_min	Минимум за (период)
-     x_max	Максимум за (период)
-     x_istrade	Были ли по бумаге сделки
-     */
-}
-
-export class TraderNet{
+export class TraderNet {
 
     private ws: ISocketPromisifyed;
     private resolvers : {
-        portfolio: Promise.Resolver<ITraderNetPortfolio>
-        quotes: Promise.Resolver<Array<ITraderNetQuote>>
-        order: Promise.Resolver<ITraderNetPutOrderData>
+        portfolio: Promise.Resolver<tn.ITraderNetPortfolio>
+        quotes: Promise.Resolver<Array<tn.ITraderNetQuote>>
+        order: Promise.Resolver<tn.ITraderNetPutOrderData>
     } = {portfolio: null, quotes: null, order: null};
 
-    constructor(private url:string, private opts: ITraderNetOpts){
+    constructor(private url:string, private opts: tn.ITraderNetOpts){
     }
 
-    static formatPutOrder(data: IPutOrderData) : ITraderNetPutOrderData {
+    static formatPutOrder(data: tn.IPutOrderData) : tn.ITraderNetPutOrderData {
         return {
             instr_name: ticketCodes.TicketCodes[data.ticket],
             action_id: data.action,
@@ -263,7 +48,7 @@ export class TraderNet{
         };
     }
 
-    static  mapPortfolio(servicePortfolio: any) : ITraderNetPortfolio {
+    static  mapPortfolio(servicePortfolio: any) : tn.ITraderNetPortfolio {
         return {
             key: servicePortfolio.key,
             accounts: servicePortfolio.acc.map(TraderNet.mapAccount),
@@ -271,8 +56,8 @@ export class TraderNet{
         }
     }
 
-    static  mapOrder(tnOrder: any) : IOrder {
-        return <IOrder>{
+    static  mapOrder(tnOrder: any) : tn.IOrder {
+        return <tn.IOrder>{
             id: tnOrder.id,
             date: tnOrder.date,
             status: tnOrder.stat,
@@ -296,7 +81,7 @@ export class TraderNet{
         }
     }
 
-    static  mapAccount(serviceAccount: any) : ITraderNetAccount {
+    static  mapAccount(serviceAccount: any) : tn.ITraderNetAccount {
         return {
             availableAmount: serviceAccount.s,
             currency: <any>currencyCodes.CurrencyCodes[serviceAccount.curr],
@@ -306,7 +91,7 @@ export class TraderNet{
         }
     }
 
-    static  mapPosition(servicePos: any) : ITraderNetPosition {
+    static  mapPosition(servicePos: any) : tn.ITraderNetPosition {
         return {
             security: <any>ticketCodes.TicketCodes[servicePos.i],
             securityType: servicePos.t,
@@ -322,7 +107,7 @@ export class TraderNet{
         }
     }
 
-    static  mapQuotes(serviceQuote: any) : ITraderNetQuote {
+    static  mapQuotes(serviceQuote: any) : tn.ITraderNetQuote {
         return {
             security: <any>ticketCodes.TicketCodes[serviceQuote.c],
             latestPrice: serviceQuote.ltp,
@@ -331,19 +116,19 @@ export class TraderNet{
     }
 
 
-    connect(auth: ITraderNetAuth): Promise<ITraderNetAuthResult>{
+    connect(auth: tn.ITraderNetAuth): Promise<tn.ITraderNetAuthResult>{
         var _ws = io(this.url, {transports: [ 'websocket' ]});
         var ws = <ISocketPromisifyed>Promise.promisifyAll(_ws);
         this.ws = ws;
 
-        return ws.onAsync<ITraderNetAuthResult>("connect").then(() => {
+        return ws.onAsync<tn.ITraderNetAuthResult>("connect").then(() => {
             var data = {
                 apiKey: auth.apiKey,
                 cmd: 'getAuthInfo',
                 nonce: Date.now()
             };
             var sig = crypto.sign(data, auth.securityKey);
-            return ws.emitAsync<ITraderNetAuthResult>('auth', data, sig);
+            return ws.emitAsync<tn.ITraderNetAuthResult>('auth', data, sig);
         }).then(res => {
             if (this.opts.onPortfolio) {
                 ws.on('portfolio', (portfolio) => {
@@ -370,9 +155,9 @@ export class TraderNet{
         });
     }
 
-    putOrder(data: IPutOrderData): Promise<IPutOrderResult> {
+    putOrder(data: tn.IPutOrderData): Promise<tn.IPutOrderResult> {
         var formatted = TraderNet.formatPutOrder(data);
-        return this.ws.emitAsync<IPutOrderResult>('putOrder', formatted);
+        return this.ws.emitAsync<tn.IPutOrderResult>('putOrder', formatted);
     }
 
     notifyPortfolio = () => {
