@@ -3,8 +3,10 @@
 
 import chai = require('chai');
 var expect = chai.expect;
+var Promise = require("bluebird");
 import tn = require("../src/trader-net-types");
 import trader = require("../src/trader-net");
+
 
 
 describe("quotes-test", () => {
@@ -61,7 +63,7 @@ describe("quotes-test", () => {
         });
 
 
-        it.skip("FAIL when there is no delay between two consiquent calls", (done) => {
+        it.skip("FAIL when there is no delay between two consequent calls", (done) => {
 
             var auth : tn.ITraderNetAuth = {
                 apiKey: process.env.TRADERNET_API_KEY,
@@ -84,7 +86,7 @@ describe("quotes-test", () => {
         });
 
 
-        it("WORK with a little delay between requests", (done) => {
+        it.only("WORK with a little delay between requests", (done) => {
 
             var auth : tn.ITraderNetAuth = {
                 apiKey: process.env.TRADERNET_API_KEY,
@@ -98,11 +100,11 @@ describe("quotes-test", () => {
             var trr = new trader.TraderNet(process.env.TRADERNET_URL, opts);
 
             trr.connect(auth).then(() => {
-                setTimeout((() => trr.notifyQuotesAsync(["URKA"])), 500);
-                return Promise.all([trr.notifyQuotesAsync(["SBER"])]);
-            }).then(() => {
-                setTimeout((() => {trr.disconnect(); done();}), 500)
-            });
+                return Promise.all([trr.notifyQuotesAsync(["SBER"]), Promise.delay(500).then(() => trr.notifyQuotesAsync(["URKA"]))]);
+            }).then((res) => {
+                console.log("quotes.spec.ts:47>>>", res);
+                return trr.disconnect();
+            }).then(done);
         });
 
     })
