@@ -77,7 +77,10 @@ export class TraderNet {
                 ws.on('q', (quotes) => this.opts.onQuotes(quotes.q.map(mapper.mapQuotes)));
 
             if (this.opts.onQuotesOnce)
-                ws.once('q', (quotes) => this.opts.onQuotesOnce(quotes.q.map(mapper.mapQuotes)));
+                ws.once('q', (quotes) => {
+                    this.opts.onQuotesOnce(quotes.q.map(mapper.mapQuotes));
+                    this.disconnect();
+                });
 
             ws.on('disconnect', () => {
                 if (this.resolvers.disconnect) {
@@ -122,17 +125,19 @@ export class TraderNet {
         this.ws.emit('notifyQuotes', utils.getCodes(tickets));
     };
 
+    createNewInstance(opts : tn.ITraderNetOpts) : Promise<TraderNet> {
+        var trr = new TraderNet(this.url, opts);
+        return trr.connect(this.auth).then(() => trr);
+    }
+
     notifyQuotesAsync = (tickets: Array<ticketCodes.TicketCodes|string>) : Promise<Array<tn.ITraderNetQuote>> => {
         var deferred = Promise.defer();
-        var trr: TraderNet;
         var opts = {
             onQuotesOnce(quotes: Array<tn.ITraderNetQuote>) {
                 deferred.resolve(quotes);
-                trr.disconnect();
             }
         };
-        trr = new TraderNet(this.url, opts);
-        trr.connect(this.auth).then(() => trr.notifyQuotes(tickets));
+        this.createNewInstance(opts).then((trr) => trr.notifyQuotes(tickets));
         return deferred.promise;
     };
 
