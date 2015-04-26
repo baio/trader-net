@@ -9,8 +9,6 @@ import ticketCodes = require("./enums/ticket-codes")
 import tn = require("./trader-net-types");
 import mapper = require("./trader-net-mapper");
 import crypto = require("./trader-net-crypto");
-import quotesResolverManager = require("./resolver-managers/quotes-resolver-manager");
-import resolverManager = require("./resolver-managers/resolver-manager");
 import utils = require("./trader-utils");
 
 interface ISocketPromisifyed extends SocketIOClient.Socket {
