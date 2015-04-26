@@ -29,6 +29,7 @@ export class TraderNet {
 
     private ws: ISocketPromisifyed;
     private resolvers: TraderNetResolvers;
+    private auth: tn.ITraderNetAuth;
 
     constructor(private url:string, private opts: tn.ITraderNetOpts){
         this.resolvers = {
@@ -40,6 +41,8 @@ export class TraderNet {
     }
 
     connect(auth: tn.ITraderNetAuth): Promise<tn.ITraderNetAuthResult>{
+        this.auth = auth;
+
         var _ws = io(this.url, {transports: [ 'websocket' ], forceNew : true});
         var ws = <ISocketPromisifyed>Promise.promisifyAll(_ws);
         this.ws = ws;
@@ -72,7 +75,6 @@ export class TraderNet {
             }
             if (this.opts.onQuotes || this.opts.listenQuotes) {
                 ws.on('q', (quotes) => {
-                    console.log("trader-net.ts:75>>>");
                     var res = quotes.q.map(mapper.mapQuotes);
                     if (this.opts.onQuotes)
                         this.opts.onQuotes(res);
@@ -123,9 +125,17 @@ export class TraderNet {
     };
 
     notifyQuotesAsync = (tickets: Array<ticketCodes.TicketCodes|string>) : Promise<Array<tn.ITraderNetQuote>> => {
-        var res = this.resolvers.quotes.push(tickets);
-        this.notifyQuotes(tickets);
-        return res;
+        var deferred = Promise.defer();
+        var trr: TraderNet;
+        var opts = {
+            onQuotes(quotes: Array<tn.ITraderNetQuote>) {
+                deferred.resolve(quotes);
+                trr.disconnect();
+            }
+        };
+        trr = new TraderNet(this.url, opts);
+        trr.connect(this.auth).then(() => trr.notifyQuotes(tickets));
+        return deferred.promise;
     };
 
     notifyOrdersAsync = () : Promise<Array<tn.IOrder>> => {

@@ -33,10 +33,11 @@ describe("quotes-test", () => {
         it("should have correct results for opts callback", (done) => {
 
             opts.onQuotes = (quotes:Array<tn.ITraderNetQuote>) => {
+                //it should be called many times
                 console.log(quotes);
-                trr.disconnect().then(done);
-
             };
+
+            setTimeout(() => {trr.disconnect().then(done)}, 1000);
 
             trr.notifyQuotes(["SBER"]);
         });
@@ -54,8 +55,7 @@ describe("quotes-test", () => {
         });
 
 
-        it.skip("FAIL when there is no delay between two consequent calls", (done) => {
-
+        it("request two separate quotes", (done) => {
             Promise.all([trr.notifyQuotesAsync(["URKA"]), trr.notifyQuotesAsync(["SBER"])])
             .then((res) => {
                 console.log("quotes.spec.ts:47>>>", res);
@@ -63,13 +63,19 @@ describe("quotes-test", () => {
             }).then(done);
         });
 
-        it("WORK with a little delay between requests", (done) => {
 
-            Promise.all([trr.notifyQuotesAsync(["SBER"]), Promise.delay(500).then(() => trr.notifyQuotesAsync(["URKA"]))])
-            .then((res) => {
-                console.log("quotes.spec.ts:47>>>", res);
-                return trr.disconnect();
-            }).then(done);
+        it("request two separate quotes and check opts silence", (done) => {
+
+            opts.onQuotes = (quotes:Array<tn.ITraderNetQuote>) => {
+                //it should be called many times
+                console.log("quotes.spec.ts:74>>>");
+            };
+
+            Promise.all([trr.notifyQuotesAsync(["URKA"]), trr.notifyQuotesAsync(["SBER"])])
+                .then((res) => {
+                    console.log("quotes.spec.ts:79>>>", res);
+                    return trr.disconnect();
+                }).then(done);
 
         });
     });
