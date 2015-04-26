@@ -106,6 +106,7 @@ export interface ITraderNetOpts {
     onPortfolio?: (portfolio: ITraderNetPortfolio) => void
     onOrders?: (orders: any) => void
     onQuotes?: (quotes: Array<ITraderNetQuote>) => void
+    onQuotesOnce?: (quotes: Array<ITraderNetQuote>) => void
     /**
      * Listen quotes if async notify quotes, is supposed to be used
      */

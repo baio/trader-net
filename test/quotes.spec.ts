@@ -40,6 +40,7 @@ describe("quotes-test", () => {
             setTimeout(() => {trr.disconnect().then(done)}, 1000);
 
             trr.notifyQuotes(["SBER"]);
+
         });
     });
 

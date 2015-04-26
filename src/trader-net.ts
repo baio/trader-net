@@ -73,14 +73,12 @@ export class TraderNet {
                     this.resolvers.orders.resolve(res);
                 });
             }
-            if (this.opts.onQuotes || this.opts.listenQuotes) {
-                ws.on('q', (quotes) => {
-                    var res = quotes.q.map(mapper.mapQuotes);
-                    if (this.opts.onQuotes)
-                        this.opts.onQuotes(res);
-                    this.resolvers.quotes.resolve(res);
-                });
-            }
+            if (this.opts.onQuotes)
+                ws.on('q', (quotes) => this.opts.onQuotes(quotes.q.map(mapper.mapQuotes)));
+
+            if (this.opts.onQuotesOnce)
+                ws.once('q', (quotes) => this.opts.onQuotesOnce(quotes.q.map(mapper.mapQuotes)));
+
             ws.on('disconnect', () => {
                 if (this.resolvers.disconnect) {
                     this.resolvers.disconnect.resolve();
@@ -128,7 +126,7 @@ export class TraderNet {
         var deferred = Promise.defer();
         var trr: TraderNet;
         var opts = {
-            onQuotes(quotes: Array<tn.ITraderNetQuote>) {
+            onQuotesOnce(quotes: Array<tn.ITraderNetQuote>) {
                 deferred.resolve(quotes);
                 trr.disconnect();
             }
