@@ -1,9 +1,9 @@
-///<reference path="../typings/bluebird/bluebird.d.ts"/>
+///<reference path="../../typings/bluebird/bluebird.d.ts"/>
 
 var Promise = require("bluebird");
-import ticketCodes = require("./ticket-codes")
-import tn = require("./trader-net-types");
-import utils = require("./utils")
+import ticketCodes = require("../enums/ticket-codes")
+import tn = require("../trader-net-types");
+import utils = require("../trader-utils")
 
 interface IQuotesResolverItem {
     key: string

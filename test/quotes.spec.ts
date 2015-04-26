@@ -15,8 +15,6 @@ describe("quotes-test", () => {
 
     beforeEach((done) => {
 
-        console.log("portfolio.spec.ts:17>>>");
-
         opts = {listenQuotes : true};
 
         var auth:tn.ITraderNetAuth = {
@@ -37,6 +35,7 @@ describe("quotes-test", () => {
             opts.onQuotes = (quotes:Array<tn.ITraderNetQuote>) => {
                 console.log(quotes);
                 trr.disconnect().then(done);
+
             };
 
             trr.notifyQuotes(["SBER"]);

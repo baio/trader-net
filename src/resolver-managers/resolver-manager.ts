@@ -1,4 +1,4 @@
-///<reference path="../typings/bluebird/bluebird.d.ts"/>
+///<reference path="../../typings/bluebird/bluebird.d.ts"/>
 var Promise = require("bluebird");
 
 interface IResolverItem<T> {

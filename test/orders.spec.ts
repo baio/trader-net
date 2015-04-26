@@ -33,6 +33,7 @@ describe("orders-test", () => {
 
             console.log("orders.spec.ts:36>>>");
 
+
             opts.onOrders = (orders:Array<tn.IOrder>) => {
                 console.log(orders);
                 trr.disconnect().then(done);

@@ -5,13 +5,13 @@
 var io = require('socket.io-client');
 var Promise = require("bluebird");
 
-import ticketCodes = require("./ticket-codes")
+import ticketCodes = require("./enums/ticket-codes")
 import tn = require("./trader-net-types");
 import mapper = require("./trader-net-mapper");
 import crypto = require("./trader-net-crypto");
-import quotesResolverManager = require("./quotes-resolver-manager");
-import resolverManager = require("./resolver-manager");
-import utils = require("./utils");
+import quotesResolverManager = require("./resolver-managers/quotes-resolver-manager");
+import resolverManager = require("./resolver-managers/resolver-manager");
+import utils = require("./trader-utils");
 
 interface ISocketPromisifyed extends SocketIOClient.Socket {
     onAsync<T>(event: string): Promise<T>
@@ -72,6 +72,7 @@ export class TraderNet {
             }
             if (this.opts.onQuotes || this.opts.listenQuotes) {
                 ws.on('q', (quotes) => {
+                    console.log("trader-net.ts:75>>>");
                     var res = quotes.q.map(mapper.mapQuotes);
                     if (this.opts.onQuotes)
                         this.opts.onQuotes(res);

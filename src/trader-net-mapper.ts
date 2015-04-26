@@ -1,6 +1,6 @@
-import currencyCodes = require("./currency-codes");
-import ticketCodes = require("./ticket-codes")
-import orderCodes = require("./order-codes");
+import currencyCodes = require("./enums/currency-codes");
+import ticketCodes = require("./enums/ticket-codes")
+import orderCodes = require("./enums/order-codes");
 import tn = require("./trader-net-types");
 
 export function formatPutOrder(data:tn.IPutOrderData):tn.ITraderNetPutOrderData {

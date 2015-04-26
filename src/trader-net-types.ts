@@ -1,7 +1,7 @@
-import ticketCodes = require("./ticket-codes")
-import orderCodes = require("./order-codes");
-import securityTypes = require("./security-types");
-import currencyCodes = require("./currency-codes");
+import ticketCodes = require("./enums/ticket-codes")
+import orderCodes = require("./enums/order-codes");
+import securityTypes = require("./enums/security-types");
+import currencyCodes = require("./enums/currency-codes");
 
 export interface ITraderNetAuth {
     apiKey: string
