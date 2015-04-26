@@ -8,6 +8,16 @@ export interface ITraderNetAuth {
     securityKey: string
 }
 
+export interface ITraderNetOpts {
+    onPortfolio?: (portfolio: ITraderNetPortfolio) => void
+    onPortfolioOnce?: (portfolio: ITraderNetPortfolio) => void
+    onOrders?: (orders: Array<IOrder>) => void
+    onOrdersOnce?: (orders: Array<IOrder>) => void
+    onQuotes?: (quotes: Array<ITraderNetQuote>) => void
+    onQuotesOnce?: (quotes: Array<ITraderNetQuote>) => void
+}
+
+
 export interface IPutOrderData {
     ticket: ticketCodes.TicketCodes
     action: orderCodes.OrderActionTypes
@@ -100,15 +110,6 @@ export interface ITraderNetPortfolio {
     accounts: Array<ITraderNetAccount>
     ///?????? ??????? ???????
     positions: Array<ITraderNetPosition>
-}
-
-export interface ITraderNetOpts {
-    onPortfolio?: (portfolio: ITraderNetPortfolio) => void
-    onPortfolioOnce?: (portfolio: ITraderNetPortfolio) => void
-    onOrders?: (orders: Array<IOrder>) => void
-    onOrdersOnce?: (orders: Array<IOrder>) => void
-    onQuotes?: (quotes: Array<ITraderNetQuote>) => void
-    onQuotesOnce?: (quotes: Array<ITraderNetQuote>) => void
 }
 
 export interface ITraderNetAuthResult {
