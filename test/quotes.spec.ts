@@ -10,6 +10,7 @@ import trader = require("../src/trader-net");
 
 describe("quotes-test", () => {
 
+
     var trr:trader.TraderNet;
     var opts:tn.ITraderNetOpts;
 
@@ -47,7 +48,6 @@ describe("quotes-test", () => {
     describe("get result via async", () => {
 
         it("should have correct results for async", (done) => {
-
             trr.notifyQuotesAsync(["SBER", "URKA"])
             .then((res) => {
                 console.log("quotes.spec.ts:47>>>", res);

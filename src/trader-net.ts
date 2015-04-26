@@ -19,9 +19,6 @@ interface ISocketPromisifyed extends SocketIOClient.Socket {
 }
 
 interface TraderNetResolvers {
-    portfolio: resolverManager.ResolverManager<tn.ITraderNetPortfolio>
-    orders: resolverManager.ResolverManager<Array<tn.IOrder>>
-    quotes: quotesResolverManager.QuotesResolver
     disconnect: Promise.Resolver<any>
 }
 
@@ -33,10 +30,7 @@ export class TraderNet {
 
     constructor(private url:string, private opts: tn.ITraderNetOpts){
         this.resolvers = {
-            portfolio: new resolverManager.ResolverManager<tn.ITraderNetPortfolio>(),
-            orders: new resolverManager.ResolverManager<Array<tn.IOrder>>(),
-            disconnect: null,
-            quotes: new quotesResolverManager.QuotesResolver()
+            disconnect: null
         };
     }
 
@@ -57,22 +51,28 @@ export class TraderNet {
             var sig = crypto.sign(data, auth.securityKey);
             return ws.emitAsync<tn.ITraderNetAuthResult>('auth', data, sig);
         }).then(res => {
-            if (this.opts.onPortfolio || this.opts.listenPortfolio) {
+
+            if (this.opts.onPortfolio) {
                 ws.on('portfolio', (portfolio) => {
-                    var res = mapper.mapPortfolio(portfolio[0].ps);
-                    if (this.opts.onPortfolio)
-                        this.opts.onPortfolio(res);
-                    this.resolvers.portfolio.resolve(res);
+                    this.opts.onPortfolio(mapper.mapPortfolio(portfolio[0].ps));
                 });
             }
-            if (this.opts.onOrders || this.opts.listenOrders) {
-                ws.on('orders', (orders) => {
-                    var res = orders[0].orders.order.map(mapper.mapOrder);
-                    if (this.opts.onOrders)
-                        this.opts.onOrders(res);
-                    this.resolvers.orders.resolve(res);
+
+            if (this.opts.onPortfolioOnce)
+                ws.once('portfolio', (portfolio) => {
+                    this.opts.onPortfolioOnce(mapper.mapPortfolio(portfolio[0].ps));
+                    this.disconnect();
                 });
-            }
+
+            if (this.opts.onOrders)
+                ws.on('orders', (orders) => this.opts.onOrders(orders[0].orders.order.map(mapper.mapOrder)));
+
+            if (this.opts.onOrdersOnce)
+                ws.once('orders', (orders) => {
+                    this.opts.onOrdersOnce(orders[0].orders.order.map(mapper.mapOrder));
+                    this.disconnect();
+                });
+
             if (this.opts.onQuotes)
                 ws.on('q', (quotes) => this.opts.onQuotes(quotes.q.map(mapper.mapQuotes)));
 
@@ -142,15 +142,25 @@ export class TraderNet {
     };
 
     notifyOrdersAsync = () : Promise<Array<tn.IOrder>> => {
-        var res = this.resolvers.orders.push();
-        this.notifyOrders();
-        return res;
+        var deferred = Promise.defer();
+        var opts = {
+            onOrdersOnce(orders: Array<tn.IOrder>) {
+                deferred.resolve(orders);
+            }
+        };
+        this.createNewInstance(opts).then((trr) => trr.notifyOrders());
+        return deferred.promise;
     };
 
     notifyPortfolioAsync = () : Promise<tn.ITraderNetPortfolio> => {
-        var res = this.resolvers.portfolio.push();
-        this.notifyPortfolio();
-        return res;
+        var deferred = Promise.defer();
+        var opts = {
+            onPortfolioOnce(portfolio: tn.ITraderNetPortfolio) {
+                deferred.resolve(portfolio);
+            }
+        };
+        this.createNewInstance(opts).then((trr) => trr.notifyPortfolio());
+        return deferred.promise;
     };
 
 }

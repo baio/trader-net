@@ -104,15 +104,11 @@ export interface ITraderNetPortfolio {
 
 export interface ITraderNetOpts {
     onPortfolio?: (portfolio: ITraderNetPortfolio) => void
-    onOrders?: (orders: any) => void
+    onPortfolioOnce?: (portfolio: ITraderNetPortfolio) => void
+    onOrders?: (orders: Array<IOrder>) => void
+    onOrdersOnce?: (orders: Array<IOrder>) => void
     onQuotes?: (quotes: Array<ITraderNetQuote>) => void
     onQuotesOnce?: (quotes: Array<ITraderNetQuote>) => void
-    /**
-     * Listen quotes if async notify quotes, is supposed to be used
-     */
-    listenQuotes?: boolean
-    listenOrders?: boolean
-    listenPortfolio?: boolean
 }
 
 export interface ITraderNetAuthResult {

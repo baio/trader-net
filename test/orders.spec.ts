@@ -14,7 +14,7 @@ describe("orders-test", () => {
 
     beforeEach((done) => {
 
-        opts = {listenOrders : true};
+        opts = {onOrders : () => {}};
 
         var auth:tn.ITraderNetAuth = {
             apiKey: process.env.TRADERNET_API_KEY,
@@ -30,8 +30,6 @@ describe("orders-test", () => {
     describe("Results via option callbacks", () => {
 
         it("should have correct result for opts callback", (done) => {
-
-            console.log("orders.spec.ts:36>>>");
 
 
             opts.onOrders = (orders:Array<tn.IOrder>) => {

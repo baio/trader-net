@@ -14,9 +14,7 @@ describe("portfolio-test", () => {
 
     beforeEach((done) => {
 
-        console.log("portfolio.spec.ts:17>>>");
-
-        opts = {listenPortfolio : true};
+        opts = {onPortfolio : () => {}};
 
         var auth:tn.ITraderNetAuth = {
             apiKey: process.env.TRADERNET_API_KEY,
@@ -29,6 +27,7 @@ describe("portfolio-test", () => {
         });
     });
 
+
     describe("Results via option callbacks", () => {
 
         it("should have correct result for opts callback", (done) => {
@@ -37,6 +36,7 @@ describe("portfolio-test", () => {
                 console.log(portfolio);
                 trr.disconnect().then(done);
             };
+
 
             trr.notifyPortfolio();
         });
