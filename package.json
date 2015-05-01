@@ -1,0 +1,25 @@
+{
+  "name": "trader-net",
+  "version": "1.0.0",
+  "description": "Wrapper for trader-net web socket api.",
+  "main": "dist/trader-net.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "trader-net"
+  ],
+  "author": "max.putilov@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^2.9.14",
+    "gulp-typescript": "^2.6.0",
+    "socket.io-client": "^1.3.5"
+  },
+  "devDependencies": {
+    "chai": "^2.2.0",
+    "gulp": "^3.8.11",
+    "mocha": "^2.2.4",
+    "typescript-require": "^0.2.8"
+  }
+}
