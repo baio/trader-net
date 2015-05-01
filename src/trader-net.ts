@@ -1,6 +1,3 @@
-///<reference path="../typings/node/node.d.ts"/>
-///<reference path="../typings/socket.io-client/socket.io-client.d.ts"/>
-///<reference path="../typings/bluebird/bluebird.d.ts"/>
 ///<reference path="./enums/ticket-codes"/>
 ///<reference path="./trader-net-types"/>
 ///<reference path="./trader-net-mapper"/>

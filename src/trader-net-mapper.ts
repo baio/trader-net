@@ -23,10 +23,10 @@ module tn {
             groupPortfolioName: data.groupPortfolio,
             userOrderId: data.userOrderId
         };
+
     }
 
     export function mapPortfolio(servicePortfolio:any):tn.ITraderNetPortfolio {
-        console.log("trader-net-mapper.ts:26>>>", servicePortfolio);
         return {
             key: servicePortfolio.key,
             accounts: servicePortfolio.acc.map(mapAccount),

@@ -1,25 +1,23 @@
 ///<reference path="../typings/tsd.d.ts"/>
 ///<reference path="../dist/definitions/tn.d.ts"/>
 
-module  ordersSpec {
+module portfolioSpec {
 
     var chai = require('chai');
     var Promise = require("bluebird");
-    var tn = require("../dist/tn");
 
+    var tn = require("../dist/tn");
     var expect = chai.expect;
 
-    describe("orders-test", () => {
+    describe("portfolio-test", () => {
 
         var trr:tn.TraderNet;
         var opts:tn.ITraderNetOpts;
 
         beforeEach((done) => {
 
-            console.log("orders.spec.ts:26>>>");
-
             opts = <any>{
-                onOrders: () => {
+                onPortfolio: () => {
                 }
             };
 
@@ -28,28 +26,25 @@ module  ordersSpec {
                 securityKey: process.env.TRADERNET_SEC_KEY
             };
 
-            trr = new tn.TraderNet(process.env.TRADERNET_URL, opts);
-
-
-            trr.connect(auth).then((res) => {
-                console.log("orders.spec.ts:34>>>", res);
+            trr = new trader.TraderNet(process.env.TRADERNET_URL, opts);
+            trr.connect(auth).then(() => {
                 done();
             });
         });
 
+
         describe("Results via option callbacks", () => {
 
-            it.only("should have correct result for opts callback", (done) => {
+            it("should have correct result for opts callback", (done) => {
 
-
-                opts.onOrders = (orders:Array<tn.IOrder>) => {
-                    console.log(orders);
+                opts.onPortfolio = (portfolio:tn.ITraderNetPortfolio) => {
+                    console.log(portfolio);
                     trr.disconnect().then(done);
                 };
 
-                trr.notifyOrders();
-            });
 
+                trr.notifyPortfolio();
+            });
 
         });
 
@@ -57,8 +52,9 @@ module  ordersSpec {
 
             it("should have correct results for async", (done) => {
 
-                trr.notifyOrdersAsync()
+                trr.notifyPortfolioAsync()
                     .then((res) => {
+                        console.log("quotes.spec.ts:47>>>", res);
                         return trr.disconnect();
                     }).then(done);
 
@@ -66,3 +62,4 @@ module  ordersSpec {
         });
     });
 }
+

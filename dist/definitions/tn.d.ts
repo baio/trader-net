@@ -1,11 +1,3 @@
-/// <reference path="../typings/mocha/mocha.d.ts" />
-/// <reference path="../typings/chai/chai.d.ts" />
-
-/// <reference path="../typings/mocha/mocha.d.ts" />
-/// <reference path="../typings/chai/chai.d.ts" />
-
-/// <reference path="../typings/node/node.d.ts" />
-declare var crypto: any;
 declare module tn.security {
     var sign: (data: any, apiSec: any) => any;
 }
@@ -509,7 +501,6 @@ declare module tn {
     function mapQuotes(serviceQuote: any): tn.ITraderNetQuote;
 }
 
-/// <reference path="../typings/node/node.d.ts" />
 declare module tn {
     interface ISecurity {
         ticket: TicketCodes;
@@ -520,9 +511,6 @@ declare module tn {
     function getCodes(tickets: Array<TicketCodes | string>, sort?: boolean): Array<string>;
 }
 
-/// <reference path="../typings/node/node.d.ts" />
-/// <reference path="../typings/socket.io-client/socket.io-client.d.ts" />
-/// <reference path="../typings/bluebird/bluebird.d.ts" />
 declare module tn {
     class TraderNet {
         private url;

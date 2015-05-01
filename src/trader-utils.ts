@@ -1,4 +1,3 @@
-/// <reference path="../typings/node/node.d.ts" />
 /// <reference path="./enums/ticket-codes" />
 
 module tn {
