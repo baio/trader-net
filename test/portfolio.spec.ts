@@ -26,7 +26,7 @@ module portfolioSpec {
                 securityKey: process.env.TRADERNET_SEC_KEY
             };
 
-            trr = new trader.TraderNet(process.env.TRADERNET_URL, opts);
+            trr = new tn.TraderNet(process.env.TRADERNET_URL, opts);
             trr.connect(auth).then(() => {
                 done();
             });

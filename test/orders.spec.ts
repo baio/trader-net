@@ -16,8 +16,6 @@ module  ordersSpec {
 
         beforeEach((done) => {
 
-            console.log("orders.spec.ts:26>>>");
-
             opts = <any>{
                 onOrders: () => {
                 }
@@ -39,8 +37,7 @@ module  ordersSpec {
 
         describe("Results via option callbacks", () => {
 
-            it.only("should have correct result for opts callback", (done) => {
-
+            it("should have correct result for opts callback", (done) => {
 
                 opts.onOrders = (orders:Array<tn.IOrder>) => {
                     console.log(orders);
@@ -61,7 +58,6 @@ module  ordersSpec {
                     .then((res) => {
                         return trr.disconnect();
                     }).then(done);
-
             });
         });
     });

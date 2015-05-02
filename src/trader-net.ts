@@ -28,6 +28,7 @@ module tn {
             this.resolvers = {
                 disconnect: null
             };
+
         }
 
         connect(auth:ITraderNetAuth):Promise<ITraderNetAuthResult> {
