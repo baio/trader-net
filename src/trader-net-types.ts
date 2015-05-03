@@ -23,6 +23,7 @@ module tn {
     export enum BookOrderActions {insert, update, remove}
 
     export interface IBookOrder {
+        index: number
         action: BookOrderActions
         ticket: TicketCodes
         price: number

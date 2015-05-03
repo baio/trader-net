@@ -50,7 +50,7 @@ module portfolioSpec {
 
         describe("Results via async", () => {
 
-            it("should have correct results for async", (done) => {
+            it.only("should have correct results for async", (done) => {
 
                 trr.notifyPortfolioAsync()
                     .then((res) => {

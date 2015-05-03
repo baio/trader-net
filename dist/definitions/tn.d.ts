@@ -411,6 +411,7 @@ declare module tn {
         remove = 2,
     }
     interface IBookOrder {
+        index: number;
         action: BookOrderActions;
         ticket: TicketCodes;
         price: number;
@@ -523,6 +524,7 @@ declare module tn {
         lotSize: number;
     }
     function getSecurity(code: TicketCodes): ISecurity;
+    function getSecurities(): Array<ISecurity>;
     function getCodes(tickets: Array<TicketCodes | string>, sort?: boolean): Array<string>;
 }
 

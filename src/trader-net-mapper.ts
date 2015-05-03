@@ -35,6 +35,7 @@ module tn {
 
     function mapOrderBookItem(ticket: string, action: tn.BookOrderActions, orderBookItem:any):tn.IBookOrder {
         return {
+            index: orderBookItem.k,
             ticket: tn.TicketCodes[ticket],
             action: action,
             price: orderBookItem.p,
