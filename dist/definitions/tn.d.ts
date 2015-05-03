@@ -403,9 +403,22 @@ declare module tn {
         onOrdersOnce?: (orders: Array<IOrder>) => void;
         onQuotes?: (quotes: Array<ITraderNetQuote>) => void;
         onQuotesOnce?: (quotes: Array<ITraderNetQuote>) => void;
+        onOrderBook?: (orders: Array<IBookOrder>) => void;
+    }
+    enum BookOrderActions {
+        insert = 0,
+        update = 1,
+        remove = 2,
+    }
+    interface IBookOrder {
+        action: BookOrderActions;
+        ticket: TicketCodes;
+        price: number;
+        quantity: number;
+        orderAction: OrderActionTypes;
     }
     interface IPutOrderData {
-        ticket: TicketCodes;
+        ticket: TicketCodes | string;
         action: OrderActionTypes;
         orderType: OrderTypes;
         currency: CurrencyCodes;
@@ -490,6 +503,7 @@ declare module tn {
     }
     interface ITraderNetQuote {
         security: TicketCodes;
+        ticket: string;
         latestPrice: number;
     }
 }
@@ -497,6 +511,7 @@ declare module tn {
 declare module tn {
     function formatPutOrder(data: IPutOrderData): tn.ITraderNetPutOrderData;
     function mapPortfolio(servicePortfolio: any): tn.ITraderNetPortfolio;
+    function mapOrderBook(orderBook: any): Array<tn.IBookOrder>;
     function mapOrder(tnOrder: any): tn.IOrder;
     function mapQuotes(serviceQuote: any): tn.ITraderNetQuote;
 }
@@ -511,6 +526,7 @@ declare module tn {
     function getCodes(tickets: Array<TicketCodes | string>, sort?: boolean): Array<string>;
 }
 
+/// <reference path="../typings/tsd.d.ts" />
 declare module tn {
     class TraderNet {
         private url;
@@ -518,12 +534,13 @@ declare module tn {
         private ws;
         private resolvers;
         private auth;
-        constructor(url: string, opts: ITraderNetOpts);
+        constructor(url: string, opts?: ITraderNetOpts);
         connect(auth: ITraderNetAuth): Promise<ITraderNetAuthResult>;
         disconnect(): Promise<any>;
         putOrder(data: tn.IPutOrderData): Promise<tn.IPutOrderResult>;
         notifyPortfolio: () => void;
         notifyOrders: () => void;
+        notifyOrderBook: (tickets: (string | TicketCodes)[]) => void;
         notifyQuotes: (tickets: (string | TicketCodes)[]) => void;
         createNewInstance(opts: tn.ITraderNetOpts): Promise<TraderNet>;
         notifyQuotesAsync: (tickets: (string | TicketCodes)[]) => Promise<ITraderNetQuote[]>;

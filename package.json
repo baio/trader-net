@@ -2,7 +2,7 @@
   "name": "trader-net",
   "version": "1.0.0",
   "description": "Wrapper for trader-net web socket api.",
-  "main": "dist/trader-net.js",
+  "main": "dist/tn.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

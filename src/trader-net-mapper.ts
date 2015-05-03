@@ -8,7 +8,7 @@ module tn {
 
     export function formatPutOrder(data:IPutOrderData):tn.ITraderNetPutOrderData {
         return {
-            instr_name: TicketCodes[data.ticket],
+            instr_name: getCodes([data.ticket])[0],
             action_id: data.action,
             order_type_id: data.orderType,
             curr: CurrencyCodes[data.currency],
@@ -23,7 +23,6 @@ module tn {
             groupPortfolioName: data.groupPortfolio,
             userOrderId: data.userOrderId
         };
-
     }
 
     export function mapPortfolio(servicePortfolio:any):tn.ITraderNetPortfolio {
@@ -32,6 +31,33 @@ module tn {
             accounts: servicePortfolio.acc.map(mapAccount),
             positions: servicePortfolio.pos.map(mapPosition)
         }
+    }
+
+    function mapOrderBookItem(ticket: string, action: tn.BookOrderActions, orderBookItem:any):tn.IBookOrder {
+        return {
+            ticket: tn.TicketCodes[ticket],
+            action: action,
+            price: orderBookItem.p,
+            quantity: orderBookItem.q,
+            orderAction: orderBookItem.s == "S" ? tn.OrderActionTypes.Sell : tn.OrderActionTypes.Buy
+        };
+    }
+
+    export function mapOrderBook(orderBook:any):Array<tn.IBookOrder> {
+        //https://github.com/tradernet/tn.api#notifyOrderBook
+        var res = orderBook.dom.map ((m: any) => {
+            var ins = m.ins.map(x =>
+                mapOrderBookItem(m.i, tn.BookOrderActions.insert, x)
+            );
+            var upd = m.upd.map(x =>
+                    mapOrderBookItem(m.i, tn.BookOrderActions.update, x)
+            );
+            var del = m.del.map(x =>
+                    mapOrderBookItem(m.i, tn.BookOrderActions.remove, x)
+            );
+            return ins.concat(del).concat(upd);
+        });
+        return  [].concat.apply([],res);
     }
 
     export function mapOrder(tnOrder:any):tn.IOrder {
@@ -88,6 +114,7 @@ module tn {
     export function mapQuotes(serviceQuote:any):tn.ITraderNetQuote {
         return {
             security: <any>TicketCodes[serviceQuote.c],
+            ticket: <string>serviceQuote.c,
             latestPrice: serviceQuote.ltp,
             lot: serviceQuote.x_lot
         };

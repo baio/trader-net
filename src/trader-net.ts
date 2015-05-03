@@ -1,3 +1,4 @@
+///<reference path="../typings/tsd.d.ts"/>
 ///<reference path="./enums/ticket-codes"/>
 ///<reference path="./trader-net-types"/>
 ///<reference path="./trader-net-mapper"/>
@@ -24,16 +25,15 @@ module tn {
         private resolvers:TraderNetResolvers;
         private auth:tn.ITraderNetAuth;
 
-        constructor(private url:string, private opts:ITraderNetOpts) {
+        constructor(private url:string, private opts:ITraderNetOpts = <any>{}) {
             this.resolvers = {
                 disconnect: null
             };
-
         }
 
         connect(auth:ITraderNetAuth):Promise<ITraderNetAuthResult> {
             this.auth = auth;
-
+            
             var _ws = io(this.url, {transports: ['websocket'], forceNew: true});
             var ws = <ISocketPromisifyed>Promise.promisifyAll(_ws);
             this.ws = ws;
@@ -69,6 +69,9 @@ module tn {
                         this.opts.onOrdersOnce(orders[0].orders.order.map(mapOrder));
                         this.disconnect();
                     });
+
+                if (this.opts.onOrderBook)
+                    ws.on('b', (orders) => this.opts.onOrderBook(mapOrderBook(orders)));
 
                 if (this.opts.onQuotes)
                     ws.on('q', (quotes) => this.opts.onQuotes(quotes.q.map(mapQuotes)));
@@ -115,6 +118,10 @@ module tn {
 
         notifyOrders = () => {
             this.ws.emit('notifyOrders');
+        };
+
+        notifyOrderBook = (tickets:Array<TicketCodes|string>) => {
+            this.ws.emit('notifyOrderBook', getCodes(tickets));
         };
 
         notifyQuotes = (tickets:Array<TicketCodes|string>) => {

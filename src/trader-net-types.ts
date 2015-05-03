@@ -17,11 +17,21 @@ module tn {
         onOrdersOnce?: (orders:Array<IOrder>) => void
         onQuotes?: (quotes:Array<ITraderNetQuote>) => void
         onQuotesOnce?: (quotes:Array<ITraderNetQuote>) => void
+        onOrderBook?: (orders:Array<IBookOrder>) => void
     }
 
+    export enum BookOrderActions {insert, update, remove}
+
+    export interface IBookOrder {
+        action: BookOrderActions
+        ticket: TicketCodes
+        price: number
+        quantity: number
+        orderAction: OrderActionTypes
+    }
 
     export interface IPutOrderData {
-        ticket: TicketCodes
+        ticket: TicketCodes|string
         action: OrderActionTypes
         orderType: OrderTypes
         currency: CurrencyCodes
@@ -145,6 +155,7 @@ module tn {
 
         ///????? ??????
         security: TicketCodes
+        ticket: string
         //???? ????????? ??????
         latestPrice : number
         /*
