@@ -26,6 +26,7 @@ module tn {
     }
 
     export function mapPortfolio(servicePortfolio:any):tn.ITraderNetPortfolio {
+
         return {
             key: servicePortfolio.key,
             accounts: servicePortfolio.acc.map(mapAccount),
