@@ -506,6 +506,8 @@ declare module tn {
         security: TicketCodes;
         ticket: string;
         latestPrice: number;
+        bid: number;
+        ask: number;
     }
 }
 

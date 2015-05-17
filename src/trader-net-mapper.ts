@@ -118,7 +118,9 @@ module tn {
             security: <any>TicketCodes[serviceQuote.c],
             ticket: <string>serviceQuote.c,
             latestPrice: serviceQuote.ltp,
-            lot: serviceQuote.x_lot
+            lot: serviceQuote.x_lot,
+            ask: serviceQuote.bap,
+            bid: serviceQuote.bbp
         };
     }
 }

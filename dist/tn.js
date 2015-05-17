@@ -578,7 +578,9 @@ var tn;
             security: tn.TicketCodes[serviceQuote.c],
             ticket: serviceQuote.c,
             latestPrice: serviceQuote.ltp,
-            lot: serviceQuote.x_lot
+            lot: serviceQuote.x_lot,
+            ask: serviceQuote.bap,
+            bid: serviceQuote.bbp
         };
     }
     tn.mapQuotes = mapQuotes;
