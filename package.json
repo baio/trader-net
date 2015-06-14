@@ -1,6 +1,6 @@
 {
   "name": "trader-net",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Wrapper for trader-net web socket api.",
   "main": "dist/tn.js",
   "scripts": {
