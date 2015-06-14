@@ -508,6 +508,7 @@ declare module tn {
         latestPrice: number;
         bid: number;
         ask: number;
+        lot: number;
     }
 }
 
@@ -530,7 +531,6 @@ declare module tn {
     function getCodes(tickets: Array<TicketCodes | string>, sort?: boolean): Array<string>;
 }
 
-/// <reference path="../typings/tsd.d.ts" />
 declare module tn {
     class TraderNet {
         private url;
