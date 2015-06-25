@@ -42,7 +42,7 @@ module tn {
         allOrNothing?: boolean
         expiration?: OrderExpirationTypes
         groupPortfolio?: number
-        userOrderId?: number
+        userOrderId?: string
     }
 
     export interface IOrder {
@@ -149,7 +149,7 @@ module tn {
         message_id: number
         replace_order_id: number
         groupPortfolioName: number
-        userOrderId: number
+        userOrderId: string
     }
 
     export interface ITraderNetQuote {

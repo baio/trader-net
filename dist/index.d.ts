@@ -1,3 +1,4 @@
+/// <reference path="../typings/tsd.d.ts" />
 declare module tn.security {
     var sign: (data: any, apiSec: any) => any;
 }
@@ -424,7 +425,7 @@ declare module tn {
         allOrNothing?: boolean;
         expiration?: OrderExpirationTypes;
         groupPortfolio?: number;
-        userOrderId?: number;
+        userOrderId?: string;
     }
     interface IOrder {
         id: number;
@@ -495,7 +496,7 @@ declare module tn {
         message_id: number;
         replace_order_id: number;
         groupPortfolioName: number;
-        userOrderId: number;
+        userOrderId: string;
     }
     interface ITraderNetQuote {
         security: TicketCodes;
