@@ -1,4 +1,3 @@
-/// <reference path="../typings/tsd.d.ts" />
 declare module tn.security {
     var sign: (data: any, apiSec: any) => any;
 }
