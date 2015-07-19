@@ -1,43 +1,38 @@
-///<reference path="../typings/tsd.d.ts"/>
-///<reference path="../dist/definitions/tn.d.ts"/>
-
-module portfolioSpec {
 
     var chai = require('chai');
     var Promise = require("bluebird");
-
-    var tn = require("../dist/tn");
+    var tn = require("../dist");
     var expect = chai.expect;
 
-    describe("portfolio-test", () => {
+    describe("portfolio-test", function () {
 
-        var trr:tn.TraderNet;
-        var opts:tn.ITraderNetOpts;
+        var trr;
+        var opts;
 
-        beforeEach((done) => {
+        beforeEach(function (done) {
 
-            opts = <any>{
-                onPortfolio: () => {
+            opts = {
+                onPortfolio: function () {
                 }
             };
 
-            var auth:tn.ITraderNetAuth = {
+            var auth = {
                 apiKey: process.env.TRADERNET_API_KEY,
                 securityKey: process.env.TRADERNET_SEC_KEY
             };
 
             trr = new tn.TraderNet(process.env.TRADERNET_URL, opts);
-            trr.connect(auth).then(() => {
+            trr.connect(auth).then(function () {
                 done();
             });
         });
 
 
-        describe.only("Results via option callbacks", () => {
+        describe("Results via option callbacks", function () {
 
-            it("should have correct result for opts callback", (done) => {
+            it("should have correct result for opts callback", function (done) {
 
-                opts.onPortfolio = (portfolio:tn.ITraderNetPortfolio) => {
+                opts.onPortfolio = function (portfolio) {
                     console.log(portfolio);
                     trr.disconnect().then(done);
                 };
@@ -48,12 +43,12 @@ module portfolioSpec {
 
         });
 
-        describe("Results via async", () => {
+        describe("Results via async", function () {
 
-            it.only("should have correct results for async", (done) => {
+            it("should have correct results for async", function (done) {
 
                 trr.notifyPortfolioAsync()
-                    .then((res) => {
+                    .then(function (res) {
                         console.log("quotes.spec.ts:47>>>", res);
                         return trr.disconnect();
                     }).then(done);
@@ -61,5 +56,5 @@ module portfolioSpec {
             });
         });
     });
-}
+
 
